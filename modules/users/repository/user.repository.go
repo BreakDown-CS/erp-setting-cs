@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"users-api/modules/users/model"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/model"
 
 	"gorm.io/gorm"
 )

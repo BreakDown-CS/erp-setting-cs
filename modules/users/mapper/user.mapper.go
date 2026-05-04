@@ -1,8 +1,8 @@
 package mapper
 
 import (
-	"users-api/modules/users/dto"
-	"users-api/modules/users/model"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/dto"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/model"
 )
 
 func ToUserList(u model.User) dto.UserListResponse {

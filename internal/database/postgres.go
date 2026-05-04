@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"users-api/internal/config"
+	"github.com/BreakDown-CS/erp-setting-cs/internal/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

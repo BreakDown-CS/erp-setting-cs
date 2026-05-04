@@ -1,9 +1,9 @@
 package users
 
 import (
-	"users-api/modules/users/handler"
-	"users-api/modules/users/repository"
-	"users-api/modules/users/service"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/handler"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/repository"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/service"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"

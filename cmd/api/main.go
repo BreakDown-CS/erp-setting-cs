@@ -1,9 +1,9 @@
 package main
 
 import (
-	"users-api/internal/config"
-	"users-api/internal/database"
-	"users-api/modules/users"
+	"github.com/BreakDown-CS/erp-setting-cs/internal/config"
+	"github.com/BreakDown-CS/erp-setting-cs/internal/database"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users"
 
 	"github.com/gofiber/fiber/v2"
 )

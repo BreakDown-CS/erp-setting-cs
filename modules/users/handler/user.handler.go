@@ -2,9 +2,10 @@ package handler
 
 import (
 	"strconv"
-	"users-api/modules/users/dto"
-	"users-api/modules/users/service"
-	"users-api/response"
+
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/dto"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/service"
+	"github.com/BreakDown-CS/erp-setting-cs/response"
 
 	"github.com/gofiber/fiber/v2"
 )

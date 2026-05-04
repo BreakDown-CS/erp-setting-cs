@@ -1,10 +1,10 @@
 package service
 
 import (
-	"users-api/modules/users/dto"
-	"users-api/modules/users/mapper"
-	"users-api/modules/users/model"
-	"users-api/modules/users/repository"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/dto"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/mapper"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/model"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/users/repository"
 )
 
 type Usecase interface {
