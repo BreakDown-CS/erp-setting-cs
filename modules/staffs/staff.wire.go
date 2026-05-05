@@ -11,7 +11,7 @@ import (
 
 func Wire(app *fiber.App, db *pgxpool.Pool) {
 	repo := repository.NewRepository(db)
-	usecase := service.NewUsecase(repo)
+	usecase := service.NewUsecase(repo, db)
 	handler := handler.NewHandler(usecase)
 
 	staffRouter(app, handler)

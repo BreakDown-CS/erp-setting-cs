@@ -1,51 +1,87 @@
 package service
 
 import (
+	"context"
+	"log"
+	"os"
+	"strconv"
+
+	"github.com/BreakDown-CS/erp-setting-cs/internal/helper"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/dto"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/model"
 	ports "github.com/BreakDown-CS/erp-setting-cs/modules/staffs/posts"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type service struct {
-	repo ports.StaffRepository
+	repo   ports.StaffRepository
+	helper *helper.Uow
+	db     *pgxpool.Pool
 }
 
 var _ ports.StaffService = (*service)(nil)
 
-func NewUsecase(r ports.StaffRepository) ports.StaffService {
-	return &service{repo: r}
-}
-
-func (u *service) InsertStaff(req dto.CreateStaffRequest) error {
-	staff := model.Staff{
-		EmployeeCode: req.Name,
+func NewUsecase(r ports.StaffRepository, db *pgxpool.Pool) ports.StaffService {
+	return &service{
+		repo:   r,
+		helper: helper.New(db),
+		db:     db,
 	}
-	return u.repo.InsertStaff(staff)
 }
 
-// func (u *service) GetAllstaffs(page int, limit int) ([]dto.StaffListResponse, int, error) {
+func (u *service) CreateStaff(ctx context.Context, req dto.CreateStaffRequest) (res dto.StaffSaveResponse, err error) {
 
-// 	offset := (page - 1) * limit
+	var staffId uuid.UUID
 
-// 	staffs, total, err := u.repo.GetAllStaff(limit, offset)
-// 	if err != nil {
-// 		return nil, 0, err
-// 	}
+	err = u.helper.WithTx(ctx, func(tx pgx.Tx) error {
 
-// 	res := make([]dto.StaffListResponse, 0)
+		staffDetail, err := u.repo.CheckDuplicate(ctx, tx, model.Staff{
+			Username: req.Username,
+		})
+		if err != nil {
+			return err
+		}
 
-// 	for _, v := range staffs {
-// 		res = append(res, mapper.ToStaffList(v))
-// 	}
+		// duplicate found
+		if staffDetail.ID != uuid.Nil {
+			log.Println("SSS")
+			staffId = uuid.Nil
+			return nil
+		}
 
-// 	return res, total, nil
-// }
+		costStr := os.Getenv("BCRYPT_COST")
+		cost, _ := strconv.Atoi(costStr)
+		passwordHash, _ := helper.HashPassword(req.Password, cost)
 
-// func (u *service) GetstaffById(id int) (dto.StaffDetailResponse, error) {
-// 	staff, err := u.repo.GetstaffById(id)
-// 	if err != nil {
-// 		return dto.StaffDetailResponse{}, err
-// 	}
+		branchID := helper.ParseUUID(req.BranchId)
+		departmentID := helper.ParseUUID(req.DepartmentId)
+		positionID := helper.ParseUUID(req.PositionId)
+		CreatedBy := helper.ParseUUID(req.CreatedBy)
 
-// 	return mapper.ToStaffDetail(staff), nil
-// }
+		staff := model.Staff{
+			EmployeeCode: req.EmployeeCode,
+			FirstName:    req.FirstName,
+			LastName:     req.LastName,
+			Username:     req.Username,
+			PasswordHash: passwordHash,
+			BranchID:     &branchID,
+			DepartmentID: &departmentID,
+			PositionID:   &positionID,
+			Status:       "active",
+			CreatedBy:    &CreatedBy,
+		}
+
+		staffId, err = u.repo.InsertStaff(ctx, tx, staff)
+		return err
+	})
+
+	if err != nil {
+		return res, err
+	}
+
+	return dto.StaffSaveResponse{
+		StaffId: staffId,
+	}, nil
+}

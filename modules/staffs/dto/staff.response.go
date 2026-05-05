@@ -1,5 +1,11 @@
 package dto
 
+import "github.com/google/uuid"
+
+type StaffSaveResponse struct {
+	StaffId uuid.UUID `json:"staff_id"`
+}
+
 type StaffListResponse struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
