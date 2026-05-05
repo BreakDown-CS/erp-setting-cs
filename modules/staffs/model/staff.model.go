@@ -53,7 +53,7 @@ type Staff struct {
 	FirstName string
 	LastName  string
 
-	Email        string
+	Username     string
 	PasswordHash string
 
 	BranchID     *uuid.UUID
@@ -76,7 +76,7 @@ type Session struct {
 	StaffID uuid.UUID
 
 	RefreshToken string
-	staffAgent    string
+	staffAgent   string
 	IPAddress    string
 
 	ExpiredAt time.Time

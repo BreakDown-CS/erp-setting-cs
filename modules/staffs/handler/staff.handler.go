@@ -4,6 +4,7 @@ import (
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/dto"
 	ports "github.com/BreakDown-CS/erp-setting-cs/modules/staffs/posts"
 	"github.com/BreakDown-CS/erp-setting-cs/response"
+	"github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -16,19 +17,25 @@ func NewHandler(u ports.StaffService) *Handler {
 	return &Handler{service: u}
 }
 
-func (h *Handler) InsetStaff(c *fiber.Ctx) error {
+func (h *Handler) SaveStaff(c *fiber.Ctx) error {
 	var req dto.CreateStaffRequest
 
 	if err := c.BodyParser(&req); err != nil {
 		return response.Error(c, 400, err)
 	}
 
-	err := h.service.InsertStaff(req)
+	ctx := c.Context()
+
+	result, err := h.service.CreateStaff(ctx, req)
 	if err != nil {
 		return response.Error(c, 500, err)
 	}
 
-	return response.Created(c, "created")
+	if result.StaffId == uuid.Nil {
+		return response.SuccessWithDuplicate(c, "staff already exist")
+	}
+
+	return response.Created(c, result, "save staff success")
 }
 
 // func (h *Handler) GetStaffs(c *fiber.Ctx) error {

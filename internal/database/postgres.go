@@ -9,6 +9,7 @@ import (
 )
 
 func ConnPostgres(cfg *config.Config) *pgxpool.Pool {
+
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.DBstaff,

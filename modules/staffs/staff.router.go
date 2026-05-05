@@ -9,7 +9,7 @@ import (
 func staffRouter(app *fiber.App, handler *handler.Handler) {
 	api := app.Group("/staffs")
 
-	api.Post("/", handler.InsetStaff)
+	api.Post("/saveStaff", handler.SaveStaff)
 	// api.Get("/", handler.GetStaffs)
 	// api.Get("/:id", handler.GetStaffById)
 

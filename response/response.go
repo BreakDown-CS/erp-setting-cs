@@ -24,9 +24,10 @@ func Success(c *fiber.Ctx, data interface{}) error {
 	})
 }
 
-func Created(c *fiber.Ctx, message string) error {
+func Created(c *fiber.Ctx, data interface{}, message string) error {
 	return c.Status(201).JSON(Response{
 		Success: true,
+		Data:    data,
 		Message: message,
 	})
 }
@@ -40,6 +41,13 @@ func Error(c *fiber.Ctx, status int, err error) error {
 	return c.Status(status).JSON(Response{
 		Success: false,
 		Error:   msg,
+	})
+}
+
+func SuccessWithDuplicate(c *fiber.Ctx, message string) error {
+	return c.JSON(Response{
+		Success: true,
+		Message: message,
 	})
 }
 
