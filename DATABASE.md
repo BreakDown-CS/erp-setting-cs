@@ -80,7 +80,7 @@ CREATE TABLE staffs (
     first_name VARCHAR(100),
     last_name VARCHAR(100),
 
-    email VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
 
     branch_id UUID REFERENCES branches(id) ON DELETE SET NULL,

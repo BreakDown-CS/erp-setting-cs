@@ -1,0 +1,12 @@
+.git
+.air.toml
+tmp
+bin
+*.exe
+*.test
+.env
+Dockerfile
+docker-compose.yml
+README.md
+API_DESIGH.md
+DATABASE.md

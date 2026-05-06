@@ -9,6 +9,6 @@ import (
 )
 
 type StaffRepository interface {
-	CheckDuplicate(ctx context.Context, tx pgx.Tx, staff model.Staff) (model.Staff, error)
+	CheckDuplicate(ctx context.Context, tx pgx.Tx, staff model.Staff) (bool, error)
 	InsertStaff(ctx context.Context, tx pgx.Tx, staff model.Staff) (uuid.UUID, error)
 }
