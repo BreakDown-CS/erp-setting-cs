@@ -7,6 +7,7 @@ import (
 
 	"github.com/BreakDown-CS/erp-setting-cs/internal/helper"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/dto"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/mapper"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/model"
 	ports "github.com/BreakDown-CS/erp-setting-cs/modules/staffs/posts"
 	"github.com/google/uuid"
@@ -36,11 +37,11 @@ func (u *service) CreateStaff(ctx context.Context, req dto.CreateStaffRequest) (
 
 	err = u.helper.WithTx(ctx, func(tx pgx.Tx) error {
 
-		staffDetail, error := u.repo.CheckDuplicate(ctx, tx, model.Staff{
+		staffDetail, err := u.repo.CheckDuplicate(ctx, tx, model.Staff{
 			Username: req.Username,
 		})
 
-		if error != nil {
+		if err != nil {
 			return err
 		}
 
@@ -82,4 +83,21 @@ func (u *service) CreateStaff(ctx context.Context, req dto.CreateStaffRequest) (
 	return dto.StaffSaveResponse{
 		StaffId: staffId,
 	}, nil
+}
+
+func (u *service) GetStaffList(page, limit int) ([]dto.StaffListResponse, int, error) {
+
+	staffList, total, err := u.repo.GetStaffList(page, limit)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var result []dto.StaffListResponse
+
+	for _, staff := range staffList {
+		result = append(result, mapper.ToStaffList(staff))
+	}
+
+	return result, total, nil
 }

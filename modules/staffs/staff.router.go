@@ -10,7 +10,7 @@ func staffRouter(app *fiber.App, handler *handler.Handler) {
 	api := app.Group("/staffs")
 
 	api.Post("/saveStaff", handler.SaveStaff)
-	// api.Get("/", handler.GetStaffs)
+	api.Get("/getStaffList", handler.GetStaffList)
 	// api.Get("/:id", handler.GetStaffById)
 
 }
