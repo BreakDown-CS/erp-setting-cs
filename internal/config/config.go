@@ -12,7 +12,7 @@ type Config struct {
 
 	DBHost     string
 	DBPort     string
-	DBstaff    string
+	DBStaff    string
 	DBPassword string
 	DBName     string
 	DBSSLMode  string
@@ -29,7 +29,7 @@ func Load() *Config {
 
 		DBHost:     getEnv("DB_HOST", "localhost"),
 		DBPort:     getEnv("DB_PORT", "5432"),
-		DBstaff:    getEnv("DB_staff", "postgres"),
+		DBStaff:    getEnv("DB_staff", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", ""),
 		DBName:     getEnv("DB_NAME", "erp"),
 		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),

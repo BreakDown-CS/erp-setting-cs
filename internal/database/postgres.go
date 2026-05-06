@@ -12,7 +12,7 @@ func ConnPostgres(cfg *config.Config) *pgxpool.Pool {
 
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
-		cfg.DBstaff,
+		cfg.DBStaff,
 		cfg.DBPassword,
 		cfg.DBHost,
 		cfg.DBPort,

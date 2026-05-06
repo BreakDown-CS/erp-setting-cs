@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"os"
 	"strconv"
 
@@ -37,16 +36,15 @@ func (u *service) CreateStaff(ctx context.Context, req dto.CreateStaffRequest) (
 
 	err = u.helper.WithTx(ctx, func(tx pgx.Tx) error {
 
-		staffDetail, err := u.repo.CheckDuplicate(ctx, tx, model.Staff{
+		staffDetail, error := u.repo.CheckDuplicate(ctx, tx, model.Staff{
 			Username: req.Username,
 		})
-		if err != nil {
+
+		if error != nil {
 			return err
 		}
 
-		// duplicate found
-		if staffDetail.ID != uuid.Nil {
-			log.Println("SSS")
+		if staffDetail {
 			staffId = uuid.Nil
 			return nil
 		}
