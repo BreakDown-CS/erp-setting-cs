@@ -8,11 +8,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func ConnPostgres(cfg *config.Config) *pgxpool.Pool {
+func ConnPostgres(cfg *config.Config) (*pgxpool.Pool, error) {
 
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
-		cfg.DBStaff,
+		cfg.DBUser,
 		cfg.DBPassword,
 		cfg.DBHost,
 		cfg.DBPort,
@@ -22,8 +22,9 @@ func ConnPostgres(cfg *config.Config) *pgxpool.Pool {
 
 	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
-		panic("cannot connect db")
+		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
 
-	return db
+	return db, nil
 }
+

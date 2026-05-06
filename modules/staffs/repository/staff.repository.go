@@ -127,3 +127,24 @@ func (r *repository) GetStaffList(page, limit int) ([]model.Staff, int, error) {
 
 	return staffList, total, nil
 }
+
+func (r *repository) GetStaffById(id uuid.UUID) (model.Staff, error) {
+	var staff model.Staff
+
+	query := `
+		SELECT id, employee_code, first_name, last_name, username, status
+		FROM erp.staffs
+		WHERE id = $1
+	`
+
+	err := r.db.QueryRow(context.Background(), query, id).Scan(
+		&staff.ID,
+		&staff.EmployeeCode,
+		&staff.FirstName,
+		&staff.LastName,
+		&staff.Username,
+		&staff.Status,
+	)
+
+	return staff, err
+}

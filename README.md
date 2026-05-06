@@ -1,196 +1,85 @@
-# 🚀 ERP Microservices (Go + Fiber + PostgreSQL)
+# ERP Setting Service
 
-## 📌 Overview
+🚀 **High-Performance ERP Staff Management System** built with Go, Fiber, and PostgreSQL. Designed with **Clean Architecture** principles and production-ready standards.
 
-ระบบ ERP (Enterprise Resource Planning) ที่ออกแบบด้วยแนวคิด **Microservices Architecture**
-พัฒนาโดยใช้ **Golang (Fiber)** และ **PostgreSQL** รองรับการทำงานด้าน:
+## ✨ Key Features
 
-* 👤 User / Staff Management
-* 📦 Inventory / Stock Management
-* 🧾 Sales / Order / Invoice
+- **Clean Architecture:** Modular design (Handler -> Service -> Repository) for high maintainability.
+- **High Performance:** Built with [Fiber](https://gofiber.io/) and [pgx](https://github.com/jackc/pgx) for optimized database interactions.
+- **Robust Security:** 
+  - Input validation using `go-playground/validator`.
+  - SQL Injection protection via parameterized queries.
+  - Graceful shutdown for data integrity.
+- **Containerized:** Fully Dockerized with optimized multi-stage builds.
+- **Developer Experience:** 
+  - Structured Logging with `slog`.
+  - Automated database initialization.
+  - Swagger-ready API documentation.
 
----
+## 🛠 Tech Stack
 
-## 🧱 Architecture
+- **Language:** Go 1.26+
+- **Framework:** Fiber v2
+- **Database:** PostgreSQL 18
+- **Infrastructure:** Docker & Docker Compose
+- **Validation:** Go-Validator v10
+- **Logging:** Slog (Structured JSON Logging)
+
+## 📁 Project Structure
 
 ```text
-Client
-  ↓
-Nginx (Reverse Proxy)
-  ↓
------------------------------
-| setting | stock | sell |
------------------------------
-        ↓
-     PostgreSQL
+├── cmd/api             # Application entry point
+├── internal/           # Private library code
+│   ├── config          # Environment configuration
+│   ├── database        # Database connection logic
+│   └── helper          # Shared helpers (Validation, etc.)
+├── modules/            # Business modules (Domain-driven)
+│   └── staffs          # Staff management module
+│       ├── dto         # Data Transfer Objects
+│       ├── handler     # HTTP Handlers
+│       ├── service     # Business Logic
+│       └── repository  # Database access
+├── response/           # Unified API response format
+└── init.sql            # Database schema & seed
 ```
 
-### 🔹 Services
+## 🚀 Getting Started
 
-| Service          | Description                 | Port |
-| ---------------- | --------------------------- | ---- |
-| `erp-setting-cs` | User / Role / Master Data   | 8001 |
-| `erp-stock-cs`   | Product / Warehouse / Stock | 8002 |
-| `erp-sell-cs`    | Order / Invoice / Payment   | 8003 |
+### Prerequisites
+
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+
+### Installation & Run
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/BreakDown-CS/erp-setting-cs.git
+   cd erp-setting-cs
+   ```
+
+2. **Run with Docker Compose:**
+   ```bash
+   docker compose up -d
+   ```
+
+3. **Verify the installation:**
+   The API will be available at `http://localhost:8080`.
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/staffs/saveStaff` | Create a new staff member |
+| `GET` | `/staffs/getStaffList` | Get paginated list of staff |
+| `POST` | `/staffs/getStaffById` | Get staff details by ID |
+
+## 🛡 Security & Best Practices
+
+- **Validation:** Every request is validated before processing.
+- **Concurrency:** Uses `pgxpool` for efficient connection management.
+- **Environment:** No secrets in code; all configurations are managed via `.env`.
+- **Graceful Shutdown:** The server listens for `SIGINT/SIGTERM` to close database connections and finish active requests safely.
 
 ---
-
-## ⚙️ Tech Stack
-
-* **Backend:** Golang (Fiber)
-* **Database:** PostgreSQL
-* **Container:** Docker / Docker Compose
-* **Architecture:** Clean Architecture
-* **API:** RESTful
-
----
-
-## 📦 Project Structure (Example)
-
-```
-erp-setting-cs/
-├── internal/
-│   ├── domain/
-│   ├── usecase/
-│   ├── repository/
-│   └── handler/
-├── main.go
-└── go.mod
-```
-
----
-
-## 🔗 Service Communication
-
-บริการแต่ละตัวสื่อสารกันผ่าน HTTP (REST API)
-
-### Example:
-
-```bash
-sell → stock → check stock
-sell → stock → deduct stock
-```
-
-```go
-http.Post("http://stock-service:8000/api/check-stock", ...)
-```
-
----
-
-## 🐳 Run with Docker
-
-### 1. Clone Project
-
-```bash
-git clone https://github.com/your-username/erp-project.git
-cd erp-project
-```
-
-### 2. Run All Services
-
-```bash
-docker-compose up --build
-```
-
----
-
-## 🌐 API Endpoints (Example)
-
-### Setting Service
-
-```
-GET    /api/users
-POST   /api/login
-```
-
-### Stock Service
-
-```
-GET    /api/products
-POST   /api/stock/in
-POST   /api/stock/out
-```
-
-### Sell Service
-
-```
-POST   /api/orders
-GET    /api/orders
-POST   /api/invoice
-```
-
----
-
-## 🧠 Business Flow
-
-### 🧾 Create Order
-
-1. User creates order (sell-service)
-2. sell-service → check stock (stock-service)
-3. stock-service → validate stock
-4. sell-service → confirm order
-5. stock-service → deduct stock
-
----
-
-## 🔐 Authentication
-
-* JWT-based authentication
-* Access Token + Refresh Token (planned)
-
----
-
-## 📊 Database Design
-
-* Single PostgreSQL instance
-* Separated by schema:
-
-  * `setting.*`
-  * `stock.*`
-  * `sell.*`
-
----
-
-## 🚀 Deployment
-
-* Dockerized services
-* Reverse Proxy (Nginx)
-* Deploy on VPS
-* Domain + HTTPS (production)
-
----
-
-## 👨‍💻 Demo Account
-
-```
-username: admin
-password: 1234
-```
-
----
-
-## 📌 Future Improvements
-
-* [ ] Add CI/CD (GitHub Actions)
-* [ ] Add Logging (Zap)
-* [ ] Add Unit Test
-* [ ] Add API Gateway
-* [ ] Add Distributed Transaction (Saga Pattern)
-
----
-
-## 🧑‍💼 Author
-
-**ARM (BreakDown-CS)**
-Backend Developer (Golang)
-
----
-
-## ⭐ Highlight
-
-* Microservices Design
-* Clean Architecture
-* Real-world ERP Flow
-* Docker-based Deployment
-
----
+*Created by [BreakDown] as a showcase of modern backend engineering in Go.*

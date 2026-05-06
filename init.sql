@@ -8,6 +8,7 @@ SET search_path TO erp, public;
 -- branches
 CREATE TABLE IF NOT EXISTS erp.branches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(100) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL UNIQUE,
 
     created_at TIMESTAMP DEFAULT NOW(),
@@ -129,3 +130,31 @@ CREATE INDEX IF NOT EXISTS idx_staffs_status ON erp.staffs(status);
 CREATE INDEX IF NOT EXISTS idx_staffs_branch ON erp.staffs(branch_id);
 CREATE INDEX IF NOT EXISTS idx_staffs_dept ON erp.staffs(department_id);
 CREATE INDEX IF NOT EXISTS idx_staffs_name ON erp.staffs(first_name, last_name);
+
+-- INSERT branches
+INSERT INTO erp.branches (id, name, created_at, updated_at, deleted_at, code) VALUES ('c74528d8-4d3f-48ca-8db1-ad471e683649', 'กรุงเทพฯ', '2026-05-05 10:12:28', '2026-05-05 10:12:32.998935', NULL, 'BBK');
+INSERT INTO erp.branches (id, name, created_at, updated_at, deleted_at, code) VALUES ('c90cd835-fbed-4ac7-9c33-9d1b3b955439', 'สมุทรปราการ', '2026-05-05 10:21:21.35922', '2026-05-05 10:21:21.35922', NULL, 'SKS');
+INSERT INTO erp.branches (id, name, created_at, updated_at, deleted_at, code) VALUES ('2af952c1-5548-422f-9879-17f06fe95fdc', 'นนทบุรี', '2026-05-05 10:22:02.728097', '2026-05-05 10:22:02.728097', NULL, 'NTB');
+
+-- INSERT departments
+INSERT INTO erp.departments (id, name, parent_id, created_at, updated_at, deleted_at) VALUES ('1335968c-a95a-4736-ad6c-7b8910eb2db8', 'ฝ่ายบริหาร', NULL, '2026-05-05 10:15:11', '2026-05-05 10:15:13.747853', NULL);
+INSERT INTO erp.departments (id, name, parent_id, created_at, updated_at, deleted_at) VALUES ('f40e64b6-b06c-4af3-9d11-18becd982ee6', 'ขาย', NULL, '2026-05-05 10:22:26.768928', '2026-05-05 10:22:26.768928', NULL);
+INSERT INTO erp.departments (id, name, parent_id, created_at, updated_at, deleted_at) VALUES ('6b913531-e4a9-4ade-9fd5-bb88063ff1d9', 'คลังสินค้า', NULL, '2026-05-05 10:22:36.351768', '2026-05-05 10:22:36.351768', NULL);
+INSERT INTO erp.departments (id, name, parent_id, created_at, updated_at, deleted_at) VALUES ('7350790b-c361-4bcd-9d3b-6ac159b94806', 'จัดซื้อ', NULL, '2026-05-05 10:22:44.423748', '2026-05-05 10:22:44.423748', NULL);
+
+-- INSERT permissions
+INSERT INTO erp.permissions (id, code, name, module) VALUES ('8ffe0618-9934-4f60-8e2f-dbf444f6b756', 'AD', 'admin', 'system');
+INSERT INTO erp.permissions (id, code, name, module) VALUES ('2b63bac7-78a5-4397-9974-b310444d0fa2', 'ST-STAFF', 'ระบบพนักงาน', 'system');
+
+-- INSERT positions
+INSERT INTO erp.positions (id, name) VALUES ('5e6a5ea5-b617-4f69-a294-5709c66b1fc3', 'admin');
+INSERT INTO erp.positions (id, name) VALUES ('7a62f48d-1130-4531-81ac-92984bb13c6f', 'sell');
+INSERT INTO erp.positions (id, name) VALUES ('a08a1a9a-db37-492a-b954-794f175c847a', 'staff');
+
+-- INSERT roles
+INSERT INTO erp.roles (id, name, description, created_at, updated_at) VALUES ('5b388dc6-9fa9-4954-a3ea-b21db19a4e33', 'admin', 'แอมินของระบบ', '2026-05-05 10:16:20.580114', '2026-05-05 10:16:20.580114');
+INSERT INTO erp.roles (id, name, description, created_at, updated_at) VALUES ('7cbc8bc1-10d6-43e9-82b4-7a0d574a949a', 'sell', 'พนักงานขาย', '2026-05-05 10:25:26.868449', '2026-05-05 10:25:26.868449');
+
+-- INSERT role_permissions
+INSERT INTO erp.role_permissions (role_id, permission_id) VALUES ('5b388dc6-9fa9-4954-a3ea-b21db19a4e33', '8ffe0618-9934-4f60-8e2f-dbf444f6b756');
+

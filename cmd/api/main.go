@@ -1,21 +1,69 @@
 package main
 
 import (
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/BreakDown-CS/erp-setting-cs/internal/config"
 	"github.com/BreakDown-CS/erp-setting-cs/internal/database"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 func main() {
+	// Initialize Structured Logger
+	loggerSlog := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(loggerSlog)
+
 	cfg := config.Load()
 
-	app := fiber.New()
+	// Connect Database with error handling
+	db, err := database.ConnPostgres(cfg)
+	if err != nil {
+		slog.Error("Database connection failed", "error", err)
+		os.Exit(1)
+	}
+	defer db.Close()
 
-	db := database.ConnPostgres(cfg)
+	app := fiber.New(fiber.Config{
+		AppName: "ERP Setting Service",
+	})
 
+	// Middlewares
+	app.Use(recover.New()) // Prevent app crash on panic
+	app.Use(logger.New(logger.Config{
+		Format: "[${time}] ${status} - ${latency} ${method} ${path}\n",
+	}))
+
+	// Dependency Injection
 	staffs.Wire(app, db)
 
-	app.Listen(":8080")
+	// Graceful Shutdown implementation
+	go func() {
+		if err := app.Listen(":" + cfg.Port); err != nil {
+			slog.Error("App failed to start", "error", err)
+		}
+	}()
+
+	slog.Info("Server is running", "port", cfg.Port)
+
+	// Wait for termination signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	slog.Info("Shutting down server...")
+
+	// Attempt to shutdown app gracefully with 10s timeout
+	if err := app.ShutdownWithTimeout(10 * time.Second); err != nil {
+		slog.Error("Server forced to shutdown", "error", err)
+	}
+
+	slog.Info("Server exited properly")
 }

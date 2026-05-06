@@ -101,3 +101,14 @@ func (u *service) GetStaffList(page, limit int) ([]dto.StaffListResponse, int, e
 
 	return result, total, nil
 }
+
+func (u *service) GetStaffById(id uuid.UUID) (dto.StaffDetailResponse, error) {
+
+	staff, err := u.repo.GetStaffById(id)
+
+	if err != nil {
+		return dto.StaffDetailResponse{}, err
+	}
+
+	return mapper.ToStaffDetail(staff), nil
+}

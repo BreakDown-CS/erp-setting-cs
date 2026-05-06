@@ -11,6 +11,5 @@ func staffRouter(app *fiber.App, handler *handler.Handler) {
 
 	api.Post("/saveStaff", handler.SaveStaff)
 	api.Get("/getStaffList", handler.GetStaffList)
-	// api.Get("/:id", handler.GetStaffById)
-
+	api.Post("/getStaffById", handler.GetStaffById)
 }
