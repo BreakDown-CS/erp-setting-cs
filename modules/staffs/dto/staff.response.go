@@ -7,9 +7,10 @@ type StaffSaveResponse struct {
 }
 
 type StaffListResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	EmployeeCode string `json:"employee_code"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Username     string `json:"username"`
 }
 
 type StaffDetailResponse struct {
