@@ -20,18 +20,22 @@ func NewRepository(db *pgxpool.Pool) ports.StaffRepository {
 	return &repository{db: db}
 }
 
-func (r *repository) CheckDuplicate(ctx context.Context, tx pgx.Tx, staff model.Staff) (model.Staff, error) {
-	var staffDetail model.Staff
+func (r *repository) CheckDuplicate(ctx context.Context, tx pgx.Tx, staff model.Staff) (bool, error) {
+	var staffDetail bool
 
 	queryCheckStaff := `
 		SELECT id FROM erp.staffs WHERE username = $1
 	`
 
 	err := tx.QueryRow(ctx, queryCheckStaff, staff.Username).Scan(
-		&staffDetail.ID,
+		&staffDetail,
 	)
 
-	return staffDetail, err
+	if err != nil {
+		return false, err
+	}
+
+	return staffDetail, nil
 }
 
 func (r *repository) InsertStaff(ctx context.Context, tx pgx.Tx, staff model.Staff) (uuid.UUID, error) {
