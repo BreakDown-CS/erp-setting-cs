@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/BreakDown-CS/erp-setting-cs/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,6 +21,8 @@ func ConnPostgres(cfg *config.Config) (*pgxpool.Pool, error) {
 		cfg.DBSSLMode,
 	)
 
+	log.Println("DSN : ", dsn)
+
 	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
@@ -27,4 +30,3 @@ func ConnPostgres(cfg *config.Config) (*pgxpool.Pool, error) {
 
 	return db, nil
 }
-
