@@ -27,15 +27,14 @@ func Load() *Config {
 	return &Config{
 		Port: getEnv("PORT", "3000"),
 
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBName:     getEnv("DB_NAME", "erp"),
+		DBHost:     getEnv("PG_DB_HOST", "127.0.0.1"),
+		DBPort:     getEnv("PG_DB_PORT", "5433"),
+		DBUser:     getEnv("PG_DB_USERNAME", "postgres"),
+		DBPassword: getEnv("PG_DB_PASSWORD", "1234"),
+		DBName:     getEnv("PG_DB_NAME", "erp_cs"),
 		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
 }
-
 
 func getEnv(key, fallback string) string {
 	val := os.Getenv(key)
