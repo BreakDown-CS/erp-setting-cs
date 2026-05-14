@@ -9,6 +9,7 @@ import (
 
 	"github.com/BreakDown-CS/erp-setting-cs/internal/config"
 	"github.com/BreakDown-CS/erp-setting-cs/internal/database"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/products"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,11 +39,14 @@ func main() {
 	// Middlewares
 	app.Use(recover.New()) // Prevent app crash on panic
 	app.Use(logger.New(logger.Config{
-		Format: "[${time}] ${status} - ${latency} ${method} ${path}\n",
+		Format:     "[${time}] | ${status} | ${latency} | ${method} ${path}\n",
+		TimeFormat: "2006-01-02 15:04:05",
+		TimeZone:   "Asia/Bangkok",
 	}))
 
 	// Dependency Injection
 	staffs.Wire(app, db)
+	products.Wire(app, db)
 
 	// Graceful Shutdown implementation
 	go func() {

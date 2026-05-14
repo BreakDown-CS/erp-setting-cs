@@ -158,3 +158,108 @@ INSERT INTO erp.roles (id, name, description, created_at, updated_at) VALUES ('7
 -- INSERT role_permissions
 INSERT INTO erp.role_permissions (role_id, permission_id) VALUES ('5b388dc6-9fa9-4954-a3ea-b21db19a4e33', '8ffe0618-9934-4f60-8e2f-dbf444f6b756');
 
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- product_categories
+CREATE TABLE erp.product_categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    category_code VARCHAR(50) UNIQUE,
+    category_name VARCHAR(255) NOT NULL,
+
+    status VARCHAR(20) DEFAULT 'active',
+
+    CONSTRAINT check_product_categories_status CHECK (
+        status IN ('active', 'in_active')
+    ),
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- product_brands
+CREATE TABLE erp.product_brands (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    brand_code VARCHAR(50) UNIQUE,
+    brand_name VARCHAR(255) NOT NULL,
+
+    status VARCHAR(20) DEFAULT 'active',
+
+    CONSTRAINT check_product_brands_status CHECK (
+        status IN ('active', 'in_active')
+    ),
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- product_models
+CREATE TABLE erp.product_models (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    models_code VARCHAR(50) UNIQUE,
+
+    models_name VARCHAR(255) NOT NULL,
+
+    brand_id UUID REFERENCES erp.product_brands(id),
+
+    status VARCHAR(20) DEFAULT 'active',
+
+    CONSTRAINT check_product_models_status CHECK (
+        status IN ('active', 'in_active')
+    ),
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- products
+CREATE TABLE erp.products (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    product_code VARCHAR(50) UNIQUE,
+
+    product_name VARCHAR(255) NOT NULL,
+
+    category_id UUID REFERENCES erp.product_categories(id),
+
+    brand_id UUID REFERENCES erp.product_brands(id),
+
+    model_id UUID REFERENCES erp.product_models(id),
+
+    descriptions TEXT,
+
+    unit VARCHAR(50),
+
+    standard_price NUMERIC(18,2)
+        DEFAULT 0
+        CHECK (standard_price >= 0),
+
+    status VARCHAR(20) DEFAULT 'active',
+
+    CONSTRAINT check_products_status CHECK (
+        status IN ('active', 'in_active')
+    ),
+
+    created_by UUID,
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    updated_by UUID,
+    updated_at TIMESTAMP
+);
+
+-- INDEX
+CREATE INDEX IF NOT EXISTS idx_products_category_id
+ON erp.products(category_id);
+
+CREATE INDEX IF NOT EXISTS idx_products_brand_id
+ON erp.products(brand_id);
+
+CREATE INDEX IF NOT EXISTS idx_products_model_id
+ON erp.products(model_id);
+
+CREATE INDEX IF NOT EXISTS idx_products_product_name
+ON erp.products(product_name);
+
+CREATE INDEX IF NOT EXISTS idx_products_status
+ON erp.products(status);
