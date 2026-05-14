@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/BreakDown-CS/erp-setting-cs/modules/products/model"
 	ports "github.com/BreakDown-CS/erp-setting-cs/modules/products/posts"
@@ -143,25 +144,11 @@ func (r *repository) GetListCatOrBrandOrModel(typeMenuProduct string) ([]model.L
 
 	queries := map[string]string{
 		"Category": `
-			SELECT
-				id,
-				category_code AS code,
-				category_name AS name
-			FROM erp.product_categories
-		`,
+			SELECT id, category_name AS name FROM erp.product_categories`,
 		"Brand": `
-			SELECT
-				id,
-				brand_code AS code,
-				brand_name AS name
-			FROM erp.product_brands
-		`,
+			SELECT id, brand_name AS name FROM erp.product_brands`,
 		"Model": `
-			SELECT
-				id,
-				models_code AS code,
-				models_name AS name
-			FROM erp.product_models
+			SELECT id, models_name AS name FROM erp.product_models
 		`,
 	}
 
@@ -169,6 +156,8 @@ func (r *repository) GetListCatOrBrandOrModel(typeMenuProduct string) ([]model.L
 	if !ok {
 		return nil, fmt.Errorf("invalid typeMenuProduct: %s", typeMenuProduct)
 	}
+
+	log.Println("dataList : ", query)
 
 	rows, err := r.db.Query(context.Background(), query)
 	if err != nil {
@@ -192,6 +181,8 @@ func (r *repository) GetListCatOrBrandOrModel(typeMenuProduct string) ([]model.L
 
 		dataList = append(dataList, item)
 	}
+
+	log.Println("dataList : ", dataList)
 
 	return dataList, nil
 }
