@@ -14,4 +14,6 @@ type ProductUsecase interface {
 	ListCategories() ([]dto.ListCatOrBrandOrModel, error)
 	ListBrands() ([]dto.ListCatOrBrandOrModel, error)
 	ListModels() ([]dto.ListCatOrBrandOrModel, error)
+
+	CreateProduct(ctx context.Context, req dto.CreateProducts) (dto.ProductsSaveResponse, error)
 }

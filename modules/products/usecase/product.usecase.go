@@ -190,3 +190,55 @@ func (u *usecase) ListModels() ([]dto.ListCatOrBrandOrModel, error) {
 
 	return result, nil
 }
+
+func (u *usecase) CreateProduct(ctx context.Context, req dto.CreateProducts) (dto.ProductsSaveResponse, error) {
+	var prodcutId uuid.UUID
+
+	err := u.helper.WithTx(ctx, func(tx pgx.Tx) error {
+
+		modelIsProduct := model.Products{
+			ProductCode: req.ProductCode,
+			ProductName: req.ProductName,
+		}
+
+		isProdcut, err := u.repo.CheckDuplicateProduct(ctx, tx, modelIsProduct)
+
+		if err != nil {
+			return err
+		}
+
+		if isProdcut {
+			prodcutId = uuid.Nil
+			return nil
+		}
+
+		categoryID := helper.ParseUUID(req.CategoryID)
+		branchID := helper.ParseUUID(req.BrandID)
+		modelID := helper.ParseUUID(req.ModelID)
+		createBy := helper.ParseUUID(req.StaffId)
+
+		modelInsertProduct := model.Products{
+			ProductCode:   req.ProductCode,
+			ProductName:   req.ProductName,
+			CategoryID:    categoryID,
+			BrandID:       branchID,
+			ModelID:       modelID,
+			Descriptions:  req.Descriptions,
+			Unit:          req.Unit,
+			StandardPrice: req.StandardPrice,
+			CreatedBy:     createBy,
+		}
+
+		prodcutId, err = u.repo.InsertProduct(ctx, tx, modelInsertProduct)
+		return err
+	})
+
+	if err != nil {
+		return dto.ProductsSaveResponse{}, err
+	}
+
+	return dto.ProductsSaveResponse{
+		Id: prodcutId,
+	}, nil
+
+}
