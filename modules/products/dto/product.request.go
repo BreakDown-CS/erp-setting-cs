@@ -12,8 +12,8 @@ type CreateProducts struct {
 	CategoryID    string  `json:"category_id" validate:"required,min=1,max=100"`
 	BrandID       string  `json:"brand_id" validate:"required,min=1,max=100"`
 	ModelID       string  `json:"model_id" validate:"required,min=1,max=100"`
-	Descriptions  string  `json:"descriptions" validate:"required,min=1,max=100"`
+	Descriptions  string  `json:"descriptions" validate:"required,min=1,max=5000"`
 	Unit          string  `json:"unit" validate:"required,min=1,max=100"`
-	StandardPrice float64 `json:"standard_price" validate:"required,min=1,max=100"`
+	StandardPrice float64 `json:"standard_price" validate:"required,gte=1"`
 	StaffId       string  `json:"staff_id" validate:"required,min=1,max=100"`
 }

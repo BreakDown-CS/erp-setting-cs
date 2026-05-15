@@ -219,6 +219,7 @@ func (r *repository) InsertProduct(ctx context.Context, tx pgx.Tx, payload model
 		payload.ProductName,
 		payload.CategoryID,
 		payload.BrandID,
+		payload.ModelID,
 		payload.Descriptions,
 		payload.Unit,
 		payload.StandardPrice,
