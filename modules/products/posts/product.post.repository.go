@@ -13,6 +13,7 @@ type ProductRepository interface {
 	InsertCategory(context.Context, pgx.Tx, model.ProductCategories) (uuid.UUID, error)
 	InsertBrand(context.Context, pgx.Tx, model.ProductBrands) (uuid.UUID, error)
 	InsertModel(context.Context, pgx.Tx, model.ProductModels) (uuid.UUID, error)
-
 	GetListCatOrBrandOrModel(string) ([]model.ListCatOrBrandOrModel, error)
+	CheckDuplicateProduct(context.Context, pgx.Tx, model.Products) (bool, error)
+	InsertProduct(context.Context, pgx.Tx, model.Products) (uuid.UUID, error)
 }

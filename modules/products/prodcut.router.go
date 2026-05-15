@@ -15,4 +15,5 @@ func productRouter(app *fiber.App, handler *handler.Handler) {
 	api.Get("/getCategory", handler.GetCategoryList)
 	api.Get("/getBrand", handler.GetBrandList)
 	api.Get("/getModel", handler.GetModelList)
+	api.Post("/SaveProduct", handler.SaveProduct)
 }

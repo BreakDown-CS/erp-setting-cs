@@ -145,3 +145,32 @@ func (h *Handler) GetModelList(c *fiber.Ctx) error {
 
 	return response.Created(c, result, "get model success")
 }
+
+func (h *Handler) SaveProduct(c *fiber.Ctx) error {
+	var req dto.CreateProducts
+
+	if err := c.BodyParser(&req); err != nil {
+		return response.Error(c, 400, err)
+	}
+
+	// Validate Request
+	if errors := helper.ValidateStruct(req); errors != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"message": "Validation failed",
+			"errors":  errors,
+		})
+	}
+
+	ctx := c.Context()
+
+	result, err := h.usecase.CreateProduct(ctx, req)
+	if err != nil {
+		return response.Error(c, 500, err)
+	}
+
+	if result.Id == uuid.Nil {
+		return response.SuccessWithDuplicate(c, "product already exist")
+	}
+
+	return response.Created(c, result, "save product success")
+}

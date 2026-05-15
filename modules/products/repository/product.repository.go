@@ -50,7 +50,7 @@ func (r *repository) CheckDuplicateCatOrBrandOrModel(ctx context.Context, tx pgx
 			SELECT EXISTS (
 				SELECT 1
 				FROM erp.product_models
-				WHERE model_code = $1
+				WHERE models_code = $1
 			)
 		`
 
@@ -185,4 +185,49 @@ func (r *repository) GetListCatOrBrandOrModel(typeMenuProduct string) ([]model.L
 	log.Println("dataList : ", dataList)
 
 	return dataList, nil
+}
+
+func (r *repository) CheckDuplicateProduct(ctx context.Context, tx pgx.Tx, payload model.Products) (bool, error) {
+	var exists bool
+
+	queryCheck := ` SELECT EXISTS (	SELECT 1 FROM erp.products WHERE product_code = $1 ) `
+
+	err := tx.QueryRow(ctx, queryCheck, payload.ProductCode).Scan(&exists)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+
+}
+
+func (r *repository) InsertProduct(ctx context.Context, tx pgx.Tx, payload model.Products) (uuid.UUID, error) {
+	var productId uuid.UUID
+
+	queryInsertProdcut := `
+		INSERT INTO erp.products
+			( product_code, product_name, category_id, brand_id, model_id, descriptions, unit, standard_price, created_by )
+		VALUES
+			( $1, $2, $3, $4, $5, $6, $7, $8, $9 )
+		RETURNING id
+	`
+
+	err := tx.QueryRow(ctx,
+		queryInsertProdcut,
+		payload.ProductCode,
+		payload.ProductName,
+		payload.CategoryID,
+		payload.BrandID,
+		payload.Descriptions,
+		payload.Unit,
+		payload.StandardPrice,
+		payload.CreatedBy,
+	).Scan(&productId)
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return productId, nil
 }
