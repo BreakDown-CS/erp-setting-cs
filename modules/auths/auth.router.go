@@ -7,7 +7,7 @@ import (
 )
 
 func authRouter(app *fiber.App, handler *handler.Handler) {
-	api := app.Group("/auth")
+	api := app.Group("/setting/auth")
 
 	api.Post("/login", handler.Login)
 	api.Get("/auth-test", middlewares.JwtAuthentication(), handler.AuthTest)

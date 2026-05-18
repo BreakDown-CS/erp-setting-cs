@@ -7,7 +7,7 @@ import (
 )
 
 func productRouter(app *fiber.App, handler *handler.Handler) {
-	api := app.Group("/products")
+	api := app.Group("/setting/products")
 
 	api.Post("/saveCategory", handler.SaveCategory)
 	api.Post("/saveBrand", handler.SaveBrand)
