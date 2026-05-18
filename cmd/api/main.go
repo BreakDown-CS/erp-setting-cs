@@ -9,10 +9,12 @@ import (
 
 	"github.com/BreakDown-CS/erp-setting-cs/internal/config"
 	"github.com/BreakDown-CS/erp-setting-cs/internal/database"
+	auth "github.com/BreakDown-CS/erp-setting-cs/modules/auths"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/products"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
@@ -37,16 +39,27 @@ func main() {
 	})
 
 	// Middlewares
-	app.Use(recover.New()) // Prevent app crash on panic
+	app.Use(recover.New())
+
+	// Logger middleware
 	app.Use(logger.New(logger.Config{
 		Format:     "[${time}] | ${status} | ${latency} | ${method} ${path}\n",
 		TimeFormat: "2006-01-02 15:04:05",
 		TimeZone:   "Asia/Bangkok",
 	}))
 
+	// CORS middleware
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:3000",
+		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization, x-apikey",
+		AllowCredentials: true,
+	}))
+
 	// Dependency Injection
 	staffs.Wire(app, db)
 	products.Wire(app, db)
+	auth.Wire(app, db)
 
 	// Graceful Shutdown implementation
 	go func() {
