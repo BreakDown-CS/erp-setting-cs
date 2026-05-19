@@ -6,7 +6,7 @@ import (
 )
 
 type AuthRepository interface {
-	SignUsersAccessToken(*model.UsersPassport) (string, error)
-	FindOneUser(string) (*model.UsersPassport, error)
+	SignUsersAccessToken(model.UsersPassport) (string, error)
+	FindOneUser(string) (model.UsersPassport, error)
 	FindPermissionByUserId(uuid.UUID) ([]model.Permissions, error)
 }

@@ -1,14 +1,10 @@
 package response
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"time"
 
-type Response struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
-	Meta    *Meta       `json:"meta,omitempty"`
-	Error   string      `json:"error,omitempty"`
-}
+	"github.com/gofiber/fiber/v2"
+)
 
 type Meta struct {
 	Page       int `json:"page"`
@@ -17,44 +13,52 @@ type Meta struct {
 	TotalPages int `json:"total_pages"`
 }
 
-func Success(c *fiber.Ctx, data interface{}) error {
-	return c.JSON(Response{
-		Success: true,
-		Data:    data,
+type ApiResponse struct {
+	Status    bool        `json:"status"`
+	Message   string      `json:"message"`
+	Code      int         `json:"code"`
+	Result    interface{} `json:"result"`
+	Meta      *Meta       `json:"meta,omitempty"`
+	Timestamp int64       `json:"timestamp"`
+}
+
+func Success(c *fiber.Ctx, data interface{}, message string) error {
+	return c.Status(fiber.StatusOK).JSON(ApiResponse{
+		Status:    true,
+		Message:   message,
+		Code:      fiber.StatusOK,
+		Result:    data,
+		Timestamp: time.Now().Unix(),
 	})
 }
 
-func Created(c *fiber.Ctx, data interface{}, message string) error {
-	return c.Status(201).JSON(Response{
-		Success: true,
-		Data:    data,
-		Message: message,
+func SuccessList(c *fiber.Ctx, data interface{}, message string, meta *Meta) error {
+	return c.Status(fiber.StatusOK).JSON(ApiResponse{
+		Status:    true,
+		Message:   message,
+		Code:      fiber.StatusOK,
+		Result:    data,
+		Meta:      meta,
+		Timestamp: time.Now().Unix(),
 	})
 }
 
-func Error(c *fiber.Ctx, status int, err error) error {
-	msg := ""
-	if err != nil {
-		msg = err.Error()
-	}
-
-	return c.Status(status).JSON(Response{
-		Success: false,
-		Error:   msg,
+func Error(c *fiber.Ctx, data interface{}, code int) error {
+	return c.Status(fiber.StatusOK).JSON(ApiResponse{
+		Status:    true,
+		Message:   "error",
+		Code:      code,
+		Result:    data,
+		Timestamp: time.Now().Unix(),
 	})
 }
 
-func SuccessWithDuplicate(c *fiber.Ctx, message string) error {
-	return c.JSON(Response{
-		Success: true,
-		Message: message,
-	})
-}
-
-func SuccessWithMeta(c *fiber.Ctx, data interface{}, meta *Meta) error {
-	return c.JSON(Response{
-		Success: true,
-		Data:    data,
-		Meta:    meta,
+func Warning(c *fiber.Ctx, message string, data interface{}) error {
+	return c.Status(fiber.StatusOK).JSON(ApiResponse{
+		Status:    false,
+		Message:   message,
+		Code:      fiber.StatusOK,
+		Result:    data,
+		Timestamp: time.Now().Unix(),
 	})
 }

@@ -20,21 +20,11 @@ func NewHandler(u ports.StaffService) *Handler {
 	return &Handler{service: u}
 }
 
-// SaveStaff handles the creation of a new staff member
-// @Summary Create a new staff
-// @Description Create a new staff with the provided details
-// @Tags staffs
-// @Accept json
-// @Produce json
-// @Param staff body dto.CreateStaffRequest true "Staff details"
-// @Success 201 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Router /staffs [post]
 func (h *Handler) SaveStaff(c *fiber.Ctx) error {
 	var req dto.CreateStaffRequest
 
 	if err := c.BodyParser(&req); err != nil {
-		return response.Error(c, 400, err)
+		return response.Warning(c, "กรุณากรอกข้อมูลให้ครบ", err)
 	}
 
 	// Validate Request
@@ -49,23 +39,16 @@ func (h *Handler) SaveStaff(c *fiber.Ctx) error {
 
 	result, err := h.service.CreateStaff(ctx, req)
 	if err != nil {
-		return response.Error(c, 500, err)
+		return response.Error(c, err, 500)
 	}
 
 	if result.StaffId == uuid.Nil {
-		return response.SuccessWithDuplicate(c, "staff already exist")
+		return response.Warning(c, "ชื่อพนักงานซ้ํา", nil)
 	}
 
-	return response.Created(c, result, "save staff success")
+	return response.Success(c, result, "บันทึกข้อมูลพนักงานสําเร็จ")
 }
 
-// GetStaffList returns a paginated list of staff members
-// @Summary Get staff list
-// @Tags staffs
-// @Param page query int false "Page number" default(1)
-// @Param limit query int false "Items per page" default(50)
-// @Success 200 {object} response.Response
-// @Router /staffs [get]
 func (h *Handler) GetStaffList(c *fiber.Ctx) error {
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -78,7 +61,7 @@ func (h *Handler) GetStaffList(c *fiber.Ctx) error {
 	}
 	staffs, total, err := h.service.GetStaffList(page, limit)
 	if err != nil {
-		return response.Error(c, 500, err)
+		return response.Error(c, err, 500)
 	}
 
 	meta := &response.Meta{
@@ -88,20 +71,20 @@ func (h *Handler) GetStaffList(c *fiber.Ctx) error {
 		TotalPages: (total + limit - 1) / limit,
 	}
 
-	return response.SuccessWithMeta(c, staffs, meta)
+	return response.SuccessList(c, staffs, "ดึงข้อมูลพนักงานสําเร็จ", meta)
 }
 
 func (h *Handler) GetStaffById(c *fiber.Ctx) error {
 	var req dto.GetStaffById
 
 	if err := c.BodyParser(&req); err != nil {
-		return response.Error(c, 400, err)
+		return response.Warning(c, "กรุณากรองข้อมูลให้ครบ", nil)
 	}
 
-	staff, err := h.service.GetStaffById(req.ID)
+	result, err := h.service.GetStaffById(req.ID)
 	if err != nil {
-		return response.Error(c, 500, err)
+		return response.Error(c, err, 500)
 	}
 
-	return response.Success(c, staff)
+	return response.Success(c, result, "ดึงข้อมูลพนักงานสําเร็จ")
 }

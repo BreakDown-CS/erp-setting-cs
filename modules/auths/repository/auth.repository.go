@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -22,7 +21,7 @@ func NewRepository(db *pgxpool.Pool) ports.AuthRepository {
 	return &repository{db: db}
 }
 
-func (r *repository) SignUsersAccessToken(req *model.UsersPassport) (string, error) {
+func (r *repository) SignUsersAccessToken(req model.UsersPassport) (string, error) {
 	claims := model.UsersClaims{
 		Id:       req.Id,
 		Username: req.Username,
@@ -48,7 +47,7 @@ func (r *repository) SignUsersAccessToken(req *model.UsersPassport) (string, err
 	return ss, nil
 }
 
-func (r *repository) FindOneUser(username string) (*model.UsersPassport, error) {
+func (r *repository) FindOneUser(username string) (model.UsersPassport, error) {
 
 	query := `
 		SELECT
@@ -86,13 +85,11 @@ func (r *repository) FindOneUser(username string) (*model.UsersPassport, error) 
 		&user.RoleId,
 	)
 
-	log.Printf("err: %#v\n", err)
-
 	if err != nil {
-		return nil, err
+		return model.UsersPassport{}, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func (r *repository) FindPermissionByUserId(roleId uuid.UUID) ([]model.Permissions, error) {

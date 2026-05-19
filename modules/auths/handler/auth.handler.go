@@ -18,17 +18,21 @@ func NewHandler(u ports.AuthUsecase) *Handler {
 func (h *Handler) Login(c *fiber.Ctx) error {
 	req := new(dto.LoginRequest)
 	if err := c.BodyParser(req); err != nil {
-		return response.Error(c, 500, err)
+		return response.Error(c, nil, 500)
 	}
 
 	ctx := c.Context()
 
 	result, err := h.service.Login(ctx, req)
 	if err != nil {
-		return response.Error(c, 500, err)
+		if err.Error() == "no rows in result set" {
+			return response.Warning(c, "ไม่พบข้อมูลพนักงาน", nil)
+		} else {
+			return response.Error(c, nil, 500)
+		}
 	}
 
-	return response.Success(c, result)
+	return response.Success(c, result, "เข้าสู่ระบบสําเร็จ")
 }
 
 func (h *Handler) AuthTest(c *fiber.Ctx) error {

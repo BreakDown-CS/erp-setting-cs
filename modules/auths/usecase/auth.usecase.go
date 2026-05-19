@@ -8,6 +8,7 @@ import (
 	"github.com/BreakDown-CS/erp-setting-cs/modules/auths/dto"
 	ports "github.com/BreakDown-CS/erp-setting-cs/modules/auths/posts"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -30,6 +31,16 @@ func (u *usecase) Login(ctx context.Context, req *dto.LoginRequest) (res dto.Use
 	user, err := u.repo.FindOneUser(req.Username)
 	if err != nil {
 		return dto.UsersLoginRes{}, err
+	}
+
+	log.Println("USER : ", user)
+
+	if user.Id == uuid.Nil {
+		return dto.UsersLoginRes{
+			User: dto.DataUsersRes{
+				Id: uuid.Nil,
+			},
+		}, nil
 	}
 
 	err = bcrypt.CompareHashAndPassword(
