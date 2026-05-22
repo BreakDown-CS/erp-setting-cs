@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"strconv"
-
 	"github.com/BreakDown-CS/erp-setting-cs/internal/helper"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/dto"
 	ports "github.com/BreakDown-CS/erp-setting-cs/modules/staffs/posts"
@@ -50,25 +48,22 @@ func (h *Handler) SaveStaff(c *fiber.Ctx) error {
 }
 
 func (h *Handler) GetStaffList(c *fiber.Ctx) error {
-	page, err := strconv.Atoi(c.Query("page", "1"))
-	if err != nil || page <= 0 {
-		page = 1
+	var req dto.GetStaffListRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return response.Warning(c, "กรุณากรอกข้อมูลให้ครบ", err)
 	}
 
-	limit, err := strconv.Atoi(c.Query("limit", "50"))
-	if err != nil || limit <= 0 {
-		limit = 50
-	}
-	staffs, total, err := h.service.GetStaffList(page, limit)
+	staffs, total, err := h.service.GetStaffList(req)
 	if err != nil {
 		return response.Error(c, err, 500)
 	}
 
 	meta := &response.Meta{
-		Page:       page,
-		Limit:      limit,
+		Page:       req.Page,
+		Limit:      req.Limit,
 		Total:      total,
-		TotalPages: (total + limit - 1) / limit,
+		TotalPages: (total + req.Limit - 1) / req.Limit,
 	}
 
 	return response.SuccessList(c, staffs, "ดึงข้อมูลพนักงานสําเร็จ", meta)

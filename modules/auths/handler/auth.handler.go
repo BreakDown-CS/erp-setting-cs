@@ -27,6 +27,8 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			return response.Warning(c, "ไม่พบข้อมูลพนักงาน", nil)
+		} else if err.Error() == "Unauthorized" {
+			return response.Warning(c, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", nil)
 		} else {
 			return response.Error(c, nil, 500)
 		}

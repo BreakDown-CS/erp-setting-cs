@@ -44,8 +44,8 @@ func SuccessList(c *fiber.Ctx, data interface{}, message string, meta *Meta) err
 }
 
 func Error(c *fiber.Ctx, data interface{}, code int) error {
-	return c.Status(fiber.StatusOK).JSON(ApiResponse{
-		Status:    true,
+	return c.Status(fiber.StatusInternalServerError).JSON(ApiResponse{
+		Status:    false,
 		Message:   "error",
 		Code:      code,
 		Result:    data,

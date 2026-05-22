@@ -17,3 +17,14 @@ type CreateStaffRequest struct {
 type GetStaffById struct {
 	ID uuid.UUID `json:"id"`
 }
+
+type GetStaffListRequest struct {
+	Username     string `json:"username"`
+	EmCode       string `json:"em_code"`
+	BranchesId   string `json:"branches_id"`
+	FullName     string `json:"full_name"`
+	Status       string `json:"status"`
+	DepartmentId string `json:"department_id"`
+	Page         int    `json:"page"`
+	Limit        int    `json:"limit"`
+}

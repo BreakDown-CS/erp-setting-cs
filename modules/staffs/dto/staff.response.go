@@ -7,11 +7,15 @@ type StaffSaveResponse struct {
 }
 
 type StaffListResponse struct {
-	ID           string `json:"id"`
-	EmployeeCode string `json:"employee_code"`
-	FirstName    string `json:"first_name"`
-	LastName     string `json:"last_name"`
-	Username     string `json:"username"`
+	ID             string `json:"id"`
+	EmployeeCode   string `json:"employee_code"`
+	FirstName      string `json:"first_name"`
+	LastName       string `json:"last_name"`
+	Username       string `json:"username"`
+	BranchName     string `json:"branch_name"`
+	DepartmentName string `json:"department_name"`
+	PositionName   string `json:"position_name"`
+	Status         string `json:"status"`
 }
 
 type StaffDetailResponse struct {

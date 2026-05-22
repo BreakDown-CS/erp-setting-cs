@@ -9,6 +9,6 @@ import (
 
 type StaffService interface {
 	CreateStaff(ctx context.Context, req dto.CreateStaffRequest) (dto.StaffSaveResponse, error)
-	GetStaffList(page, limit int) ([]dto.StaffListResponse, int, error)
+	GetStaffList(dto.GetStaffListRequest) ([]dto.StaffListResponse, int, error)
 	GetStaffById(id uuid.UUID) (dto.StaffDetailResponse, error)
 }

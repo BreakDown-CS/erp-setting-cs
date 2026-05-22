@@ -97,3 +97,16 @@ type ActivityLog struct {
 
 	CreatedAt time.Time
 }
+
+// ///////////////////////////////////////////////////////////////////////////////
+type StaffList struct {
+	ID             uuid.UUID
+	EmployeeCode   string
+	FirstName      string
+	LastName       string
+	Username       string
+	BranchName     string
+	DepartmentName string
+	PositionName   string
+	Status         string
+}

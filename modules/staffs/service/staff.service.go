@@ -85,9 +85,9 @@ func (u *service) CreateStaff(ctx context.Context, req dto.CreateStaffRequest) (
 	}, nil
 }
 
-func (u *service) GetStaffList(page, limit int) ([]dto.StaffListResponse, int, error) {
+func (u *service) GetStaffList(payload dto.GetStaffListRequest) ([]dto.StaffListResponse, int, error) {
 
-	staffList, total, err := u.repo.GetStaffList(page, limit)
+	staffList, total, err := u.repo.GetStaffList(payload)
 
 	if err != nil {
 		return nil, 0, err

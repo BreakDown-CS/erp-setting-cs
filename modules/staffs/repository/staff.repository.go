@@ -2,7 +2,10 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
+	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/dto"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs/model"
 	ports "github.com/BreakDown-CS/erp-setting-cs/modules/staffs/posts"
 	"github.com/google/uuid"
@@ -72,40 +75,115 @@ func (r *repository) InsertStaff(ctx context.Context, tx pgx.Tx, staff model.Sta
 	return id, nil
 }
 
-func (r *repository) GetStaffList(page, limit int) ([]model.Staff, int, error) {
-	var staffList []model.Staff
+func (r *repository) GetStaffList(req dto.GetStaffListRequest) ([]model.StaffList, int, error) {
+	var staffList []model.StaffList
 
-	if page <= 0 {
-		page = 1
+	if req.Page <= 0 {
+		req.Page = 1
 	}
 
-	if limit <= 0 {
-		limit = 50
+	if req.Limit <= 0 {
+		req.Limit = 50
 	}
 
-	offset := (page - 1) * limit
+	offset := (req.Page - 1) * req.Limit
 
-	query := `
-		SELECT id, employee_code, first_name, last_name, username
-		FROM erp.staffs
-		LIMIT $1 OFFSET $2
-	`
+	conditions := []string{}
+	args := []interface{}{}
+	argIndex := 1
 
-	rows, err := r.db.Query(context.Background(), query, limit, offset)
+	if req.Username != "" {
+		conditions = append(conditions,
+			fmt.Sprintf("s.username = $%d", argIndex))
+		args = append(args, req.Username)
+		argIndex++
+	}
+
+	if req.EmCode != "" {
+		conditions = append(conditions,
+			fmt.Sprintf("s.employee_code = $%d", argIndex))
+		args = append(args, req.EmCode)
+		argIndex++
+	}
+
+	if req.BranchesId != "" {
+		conditions = append(conditions,
+			fmt.Sprintf("s.branch_id = $%d", argIndex))
+		args = append(args, req.BranchesId)
+		argIndex++
+	}
+
+	if req.FullName != "" {
+		conditions = append(conditions,
+			fmt.Sprintf("(s.first_name || ' ' || s.last_name) ILIKE $%d", argIndex))
+		args = append(args, fmt.Sprintf("%%%s%%", req.FullName))
+		argIndex++
+	}
+
+	if req.Status != "" {
+		conditions = append(conditions,
+			fmt.Sprintf("s.status = $%d", argIndex))
+		args = append(args, req.Status)
+		argIndex++
+	}
+
+	if req.DepartmentId != "" {
+		conditions = append(conditions,
+			fmt.Sprintf("s.department_id = $%d", argIndex))
+		args = append(args, req.DepartmentId)
+		argIndex++
+	}
+
+	whereQuery := ""
+	if len(conditions) > 0 {
+		whereQuery = "WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	limitArg := argIndex
+	offsetArg := argIndex + 1
+
+	args = append(args, req.Limit, offset)
+
+	query := fmt.Sprintf(`
+		SELECT
+			s.id,
+			s.username,
+			s.employee_code,
+			s.first_name,
+			s.last_name,
+			bc.code || ' (' || bc.name || ')' AS branches_name,
+			dpm.name AS department_name,
+			pst.name AS position_name,
+			s.status
+		FROM erp.staffs s
+			LEFT JOIN erp.branches bc ON s.branch_id = bc.id
+			LEFT JOIN erp.departments dpm ON s.department_id = dpm.id
+			LEFT JOIN erp.positions pst ON s.position_id = pst.id
+		%s
+		ORDER BY s.id ASC
+		LIMIT $%d OFFSET $%d
+	`, whereQuery, limitArg, offsetArg)
+
+	rows, err := r.db.Query(context.Background(), query, args...)
 	if err != nil {
+		fmt.Println("query err:", err)
 		return nil, 0, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var staff model.Staff
+		var staff model.StaffList
 
 		err := rows.Scan(
 			&staff.ID,
+			&staff.Username,
 			&staff.EmployeeCode,
 			&staff.FirstName,
 			&staff.LastName,
-			&staff.Username,
+			&staff.BranchName,
+			&staff.DepartmentName,
+			&staff.PositionName,
+			&staff.Status,
 		)
 		if err != nil {
 			return nil, 0, err
@@ -118,9 +196,17 @@ func (r *repository) GetStaffList(page, limit int) ([]model.Staff, int, error) {
 		return nil, 0, err
 	}
 
+	// total count
+	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM erp.staffs s %s`, whereQuery)
+
 	var total int
-	countQuery := `SELECT COUNT(*) FROM erp.staffs`
-	err = r.db.QueryRow(context.Background(), countQuery).Scan(&total)
+
+	err = r.db.QueryRow(
+		context.Background(),
+		countQuery,
+		args[:len(args)-2]..., // ตัด limit offset ออก
+	).Scan(&total)
+
 	if err != nil {
 		return nil, 0, err
 	}

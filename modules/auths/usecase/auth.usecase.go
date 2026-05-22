@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"log"
 
 	"github.com/BreakDown-CS/erp-setting-cs/internal/helper"
 	"github.com/BreakDown-CS/erp-setting-cs/modules/auths/dto"
@@ -33,8 +32,6 @@ func (u *usecase) Login(ctx context.Context, req *dto.LoginRequest) (res dto.Use
 		return dto.UsersLoginRes{}, err
 	}
 
-	log.Println("USER : ", user)
-
 	if user.Id == uuid.Nil {
 		return dto.UsersLoginRes{
 			User: dto.DataUsersRes{
@@ -49,7 +46,6 @@ func (u *usecase) Login(ctx context.Context, req *dto.LoginRequest) (res dto.Use
 	)
 
 	if err != nil {
-		log.Println(err)
 		return dto.UsersLoginRes{}, fiber.ErrUnauthorized
 	}
 
