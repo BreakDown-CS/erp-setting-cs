@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -31,6 +32,8 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
+
+	log.Println("Database connection")
 
 	app := fiber.New(fiber.Config{
 		AppName: "ERP Setting Service",

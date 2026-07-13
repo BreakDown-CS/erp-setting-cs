@@ -30,7 +30,7 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 		} else if err.Error() == "Unauthorized" {
 			return response.Warning(c, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", nil)
 		} else {
-			return response.Error(c, nil, 500)
+			return response.Error(c, err, 500)
 		}
 	}
 
