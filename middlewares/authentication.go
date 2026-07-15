@@ -25,11 +25,9 @@ func JwtAuthentication() fiber.Handler {
 
 		secretKey := os.Getenv("JWT_SECRET_KEY")
 		token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
-			// Don't forget to validate the alg is what you expect:
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("error, unexpected signing method: %v", token.Header["alg"])
 			}
-			// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 			return []byte(secretKey), nil
 		})
 		if err != nil {

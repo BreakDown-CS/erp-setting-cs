@@ -196,7 +196,6 @@ func (r *repository) GetStaffList(req dto.GetStaffListRequest) ([]model.StaffLis
 		return nil, 0, err
 	}
 
-	// total count
 	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM erp.staffs s %s`, whereQuery)
 
 	var total int
@@ -204,7 +203,7 @@ func (r *repository) GetStaffList(req dto.GetStaffListRequest) ([]model.StaffLis
 	err = r.db.QueryRow(
 		context.Background(),
 		countQuery,
-		args[:len(args)-2]..., // ตัด limit offset ออก
+		args[:len(args)-2]...,
 	).Scan(&total)
 
 	if err != nil {

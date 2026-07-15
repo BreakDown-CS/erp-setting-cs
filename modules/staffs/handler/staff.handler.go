@@ -25,7 +25,6 @@ func (h *Handler) SaveStaff(c *fiber.Ctx) error {
 		return response.Warning(c, "กรุณากรอกข้อมูลให้ครบ", err)
 	}
 
-	// Validate Request
 	if errors := helper.ValidateStruct(req); errors != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"message": "Validation failed",

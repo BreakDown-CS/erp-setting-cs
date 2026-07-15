@@ -41,8 +41,8 @@ func (u *usecase) Login(ctx context.Context, req *dto.LoginRequest) (res dto.Use
 	}
 
 	err = bcrypt.CompareHashAndPassword(
-		[]byte(user.Password), // hash จาก DB
-		[]byte(req.Password),  // password ที่ user login
+		[]byte(user.Password),
+		[]byte(req.Password),
 	)
 
 	if err != nil {

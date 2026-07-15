@@ -24,7 +24,6 @@ func (h *Handler) SaveCategory(c *fiber.Ctx) error {
 		return response.Warning(c, "กรุณากรอกข้อมูลให้ครบ", err)
 	}
 
-	// Validate Request
 	if errors := helper.ValidateStruct(req); errors != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"message": "Validation failed",
@@ -53,7 +52,6 @@ func (h *Handler) SaveBrand(c *fiber.Ctx) error {
 		return response.Error(c, nil, 500)
 	}
 
-	// Validate Request
 	if errors := helper.ValidateStruct(req); errors != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"message": "Validation failed",
@@ -82,7 +80,6 @@ func (h *Handler) SaveModel(c *fiber.Ctx) error {
 		return response.Error(c, nil, 500)
 	}
 
-	// Validate Request
 	if errors := helper.ValidateStruct(req); errors != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"message": "Validation failed",
@@ -153,7 +150,6 @@ func (h *Handler) SaveProduct(c *fiber.Ctx) error {
 		return response.Error(c, nil, 500)
 	}
 
-	// Validate Request
 	if errors := helper.ValidateStruct(req); errors != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"message": "Validation failed",
