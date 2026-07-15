@@ -16,6 +16,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 func main() {
@@ -40,18 +42,18 @@ func main() {
 	})
 
 	// Middlewares
-	// app.Use(recover.New())
+	app.Use(recover.New())
 
 	// Logger middleware
-	// app.Use(logger.New(logger.Config{
-	// 	Format:     "[${time}] | ${status} | ${latency} | ${method} ${path}\n",
-	// 	TimeFormat: "2006-01-02 15:04:05",
-	// 	TimeZone:   "Asia/Bangkok",
-	// }))
+	app.Use(logger.New(logger.Config{
+		Format:     "[${time}] | ${status} | ${latency} | ${method} ${path}\n",
+		TimeFormat: "2006-01-02 15:04:05",
+		TimeZone:   "Asia/Bangkok",
+	}))
 
 	// CORS middleware
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5000,http://localhost:64961,http://localhost:3000",
+		AllowOrigins:     "http://localhost:5000,http://localhost:64961,http://localhost:3000,http://103.107.53.39",
 		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowCredentials: true,
