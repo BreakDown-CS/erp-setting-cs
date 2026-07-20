@@ -44,21 +44,29 @@ func SuccessList(c *fiber.Ctx, data interface{}, message string, meta *Meta) err
 }
 
 func Error(c *fiber.Ctx, data interface{}, code int) error {
+	var result interface{} = data
+	if err, ok := data.(error); ok {
+		result = err.Error()
+	}
 	return c.Status(fiber.StatusInternalServerError).JSON(ApiResponse{
 		Status:    false,
 		Message:   "error",
 		Code:      code,
-		Result:    data,
+		Result:    result,
 		Timestamp: time.Now().Unix(),
 	})
 }
 
 func Warning(c *fiber.Ctx, message string, data interface{}) error {
+	var result interface{} = data
+	if err, ok := data.(error); ok {
+		result = err.Error()
+	}
 	return c.Status(fiber.StatusOK).JSON(ApiResponse{
 		Status:    false,
 		Message:   message,
 		Code:      fiber.StatusOK,
-		Result:    data,
+		Result:    result,
 		Timestamp: time.Now().Unix(),
 	})
 }

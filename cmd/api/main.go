@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,8 +10,8 @@ import (
 	"github.com/BreakDown-CS/erp-setting-cs/internal/config"
 	"github.com/BreakDown-CS/erp-setting-cs/internal/database"
 	auth "github.com/BreakDown-CS/erp-setting-cs/modules/auths"
-	"github.com/BreakDown-CS/erp-setting-cs/modules/products"
-	"github.com/BreakDown-CS/erp-setting-cs/modules/staffs"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/employee"
+	"github.com/BreakDown-CS/erp-setting-cs/modules/setup"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -21,19 +20,16 @@ import (
 )
 
 func main() {
-	loggerSlog := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	slog.SetDefault(loggerSlog)
 
 	cfg := config.Load()
 
 	db, err := database.ConnPostgres(cfg)
 	if err != nil {
-		slog.Error("Database connection failed", "error", err)
-		os.Exit(1)
+		log.Fatalf("Database connection failed : %v", err)
 	}
 	defer db.Close()
 
-	log.Println("Database connection")
+	log.Println("✅ Database connected")
 
 	app := fiber.New(fiber.Config{
 		AppName: "ERP Setting Service",
@@ -54,27 +50,27 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	staffs.Wire(app, db)
-	products.Wire(app, db)
 	auth.Wire(app, db)
+	setup.Wire(app, db)
+	employee.Wire(app, db)
 
 	go func() {
 		if err := app.Listen(":" + cfg.Port); err != nil {
-			slog.Error("App failed to start", "error", err)
+			log.Fatalf("App failed to start : %v", err)
 		}
 	}()
 
-	slog.Info("Server is running", "port", cfg.Port)
+	log.Printf("🚀 Server started on port %s\n", cfg.Port)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	slog.Info("Shutting down server...")
+	log.Println("🛑 Shutting down server...")
 
 	if err := app.ShutdownWithTimeout(10 * time.Second); err != nil {
-		slog.Error("Server forced to shutdown", "error", err)
+		log.Printf("Shutdown error : %v", err)
 	}
 
-	slog.Info("Server exited properly")
+	log.Println("✅ Server exited")
 }

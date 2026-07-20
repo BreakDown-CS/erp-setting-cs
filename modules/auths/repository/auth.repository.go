@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/BreakDown-CS/erp-setting-cs/modules/auths/model"
-	ports "github.com/BreakDown-CS/erp-setting-cs/modules/auths/posts"
+	posts "github.com/BreakDown-CS/erp-setting-cs/modules/auths/posts"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -17,7 +17,7 @@ type repository struct {
 	db *pgxpool.Pool
 }
 
-func NewRepository(db *pgxpool.Pool) ports.AuthRepository {
+func NewRepository(db *pgxpool.Pool) posts.AuthRepository {
 	return &repository{db: db}
 }
 
