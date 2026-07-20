@@ -10,9 +10,9 @@ import (
 )
 
 type StaffRepository interface {
-	CheckDuplicate(ctx context.Context, tx pgx.Tx, staff model.Staff) (bool, error)
+	CheckDuplicate(ctx context.Context, tx pgx.Tx, username string, employeeCode string) (bool, error)
 	InsertStaff(ctx context.Context, tx pgx.Tx, staff model.Staff) (uuid.UUID, error)
 
-	GetStaffList(dto.GetStaffListRequest) ([]model.StaffList, int, error)
-	GetStaffById(id uuid.UUID) (model.Staff, error)
+	GetStaffList(ctx context.Context, req dto.GetStaffListRequest) ([]model.StaffList, int, error)
+	GetStaffById(ctx context.Context, id uuid.UUID) (model.Staff, error)
 }
