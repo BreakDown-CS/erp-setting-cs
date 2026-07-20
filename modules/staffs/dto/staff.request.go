@@ -3,11 +3,11 @@ package dto
 import "github.com/google/uuid"
 
 type CreateStaffRequest struct {
-	EmployeeCode string `json:"employee_code" validate:"required,min=3"`
-	FirstName    string `json:"first_name" validate:"required"`
-	LastName     string `json:"last_name" validate:"required"`
-	Username     string `json:"username" validate:"required,min=4"`
-	Password     string `json:"password" validate:"required,min=6"`
+	EmployeeCode string `json:"employee_code" validate:"required,min=3,max=50"`
+	FirstName    string `json:"first_name" validate:"required,min=1,max=100"`
+	LastName     string `json:"last_name" validate:"required,min=1,max=100"`
+	Username     string `json:"username" validate:"required,min=4,max=50"`
+	Password     string `json:"password" validate:"required,min=6,max=100"`
 	BranchId     string `json:"branch_id" validate:"omitempty,uuid"`
 	DepartmentId string `json:"department_id" validate:"omitempty,uuid"`
 	PositionId   string `json:"position_id" validate:"omitempty,uuid"`
@@ -15,16 +15,16 @@ type CreateStaffRequest struct {
 }
 
 type GetStaffById struct {
-	ID uuid.UUID `json:"id"`
+	ID uuid.UUID `json:"id" validate:"required"`
 }
 
 type GetStaffListRequest struct {
 	Username     string `json:"username"`
-	EmCode       string `json:"em_code"`
-	BranchesId   string `json:"branches_id"`
+	EmployeeCode string `json:"employee_code"`
+	BranchId     string `json:"branch_id"`
 	FullName     string `json:"full_name"`
 	Status       string `json:"status"`
 	DepartmentId string `json:"department_id"`
-	Page         int    `json:"page"`
-	Limit        int    `json:"limit"`
+	Page         int    `json:"page" validate:"omitempty,min=1"`
+	Limit        int    `json:"limit" validate:"omitempty,min=1,max=100"`
 }

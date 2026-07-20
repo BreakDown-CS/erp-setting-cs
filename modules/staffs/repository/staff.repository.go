@@ -23,39 +23,36 @@ func NewRepository(db *pgxpool.Pool) ports.StaffRepository {
 	return &repository{db: db}
 }
 
-func (r *repository) CheckDuplicate(ctx context.Context, tx pgx.Tx, staff model.Staff) (bool, error) {
-	var staffDetail bool
+func (r *repository) CheckDuplicate(ctx context.Context, tx pgx.Tx, username string, employeeCode string) (bool, error) {
+	var exists bool
 
-	queryCheckStaff := `
+	query := `
 		SELECT EXISTS (
-			SELECT 1 FROM erp.staffs WHERE username = $1
+			SELECT 1 FROM erp.staffs 
+			WHERE (username = $1 OR employee_code = $2) AND deleted_at IS NULL
 		)
 	`
-	err := tx.QueryRow(ctx, queryCheckStaff, staff.Username).Scan(
-		&staffDetail,
-	)
-
+	err := tx.QueryRow(ctx, query, username, employeeCode).Scan(&exists)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("check duplicate failed: %w", err)
 	}
 
-	return staffDetail, nil
+	return exists, nil
 }
 
 func (r *repository) InsertStaff(ctx context.Context, tx pgx.Tx, staff model.Staff) (uuid.UUID, error) {
 	var id uuid.UUID
 
-	queryInsertStaff := `
+	query := `
 		INSERT INTO erp.staffs 
-			( employee_code, first_name, last_name, username, password_hash, branch_id, department_id, position_id, status, created_by )
+			(employee_code, first_name, last_name, username, password_hash, 
+			 branch_id, department_id, position_id, status, created_by)
 		VALUES
-			( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id
 	`
 
-	err := tx.QueryRow(
-		ctx,
-		queryInsertStaff,
+	err := tx.QueryRow(ctx, query,
 		staff.EmployeeCode,
 		staff.FirstName,
 		staff.LastName,
@@ -69,89 +66,114 @@ func (r *repository) InsertStaff(ctx context.Context, tx pgx.Tx, staff model.Sta
 	).Scan(&id)
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, fmt.Errorf("insert staff failed: %w", err)
 	}
 
 	return id, nil
 }
 
-func (r *repository) GetStaffList(req dto.GetStaffListRequest) ([]model.StaffList, int, error) {
-	var staffList []model.StaffList
+// queryCondition represents a SQL WHERE condition
+type queryCondition struct {
+	condition string      // SQL condition template, use $%d for parameter placeholder
+	arg       interface{} // argument value, nil for conditions without parameters
+	hasParam  bool        // whether this condition has a parameter
+}
 
+// buildWhereClause builds a WHERE clause from a list of conditions
+func buildWhereClause(conditions []queryCondition) (string, []interface{}) {
+	if len(conditions) == 0 {
+		return "", nil
+	}
+
+	var clauses []string
+	var args []interface{}
+	paramIdx := 1
+
+	for _, cond := range conditions {
+		if cond.hasParam {
+			clauses = append(clauses, fmt.Sprintf(cond.condition, paramIdx))
+			args = append(args, cond.arg)
+			paramIdx++
+		} else {
+			clauses = append(clauses, cond.condition)
+		}
+	}
+
+	return "WHERE " + strings.Join(clauses, " AND "), args
+}
+
+func (r *repository) GetStaffList(ctx context.Context, req dto.GetStaffListRequest) ([]model.StaffList, int, error) {
+	// Default pagination
 	if req.Page <= 0 {
 		req.Page = 1
 	}
-
-	if req.Limit <= 0 {
+	if req.Limit <= 0 || req.Limit > 100 {
 		req.Limit = 50
 	}
 
 	offset := (req.Page - 1) * req.Limit
 
-	conditions := []string{}
-	args := []interface{}{}
-	argIndex := 1
+	var conditions []queryCondition
 
 	if req.Username != "" {
-		conditions = append(conditions,
-			fmt.Sprintf("s.username = $%d", argIndex))
-		args = append(args, req.Username)
-		argIndex++
+		conditions = append(conditions, queryCondition{
+			condition: "s.username = $%d",
+			arg:       req.Username,
+		})
 	}
 
-	if req.EmCode != "" {
-		conditions = append(conditions,
-			fmt.Sprintf("s.employee_code = $%d", argIndex))
-		args = append(args, req.EmCode)
-		argIndex++
+	if req.EmployeeCode != "" {
+		conditions = append(conditions, queryCondition{
+			condition: "s.employee_code = $%d",
+			arg:       req.EmployeeCode,
+		})
 	}
 
-	if req.BranchesId != "" {
-		conditions = append(conditions,
-			fmt.Sprintf("s.branch_id = $%d", argIndex))
-		args = append(args, req.BranchesId)
-		argIndex++
+	if req.BranchId != "" {
+		conditions = append(conditions, queryCondition{
+			condition: "s.branch_id = $%d",
+			arg:       req.BranchId,
+		})
 	}
 
 	if req.FullName != "" {
-		conditions = append(conditions,
-			fmt.Sprintf("(s.first_name || ' ' || s.last_name) ILIKE $%d", argIndex))
-		args = append(args, fmt.Sprintf("%%%s%%", req.FullName))
-		argIndex++
+		conditions = append(conditions, queryCondition{
+			condition: "(s.first_name || ' ' || s.last_name) ILIKE $%d",
+			arg:       fmt.Sprintf("%%%s%%", req.FullName),
+		})
 	}
 
 	if req.Status != "" {
-		conditions = append(conditions,
-			fmt.Sprintf("s.status = $%d", argIndex))
-		args = append(args, req.Status)
-		argIndex++
+		conditions = append(conditions, queryCondition{
+			condition: "s.status = $%d",
+			arg:       req.Status,
+		})
 	}
 
 	if req.DepartmentId != "" {
-		conditions = append(conditions,
-			fmt.Sprintf("s.department_id = $%d", argIndex))
-		args = append(args, req.DepartmentId)
-		argIndex++
+		conditions = append(conditions, queryCondition{
+			condition: "s.department_id = $%d",
+			arg:       req.DepartmentId,
+		})
 	}
 
-	whereQuery := ""
-	if len(conditions) > 0 {
-		whereQuery = "WHERE " + strings.Join(conditions, " AND ")
-	}
+	// Always filter soft-deleted records
+	conditions = append(conditions, queryCondition{
+		condition: "s.deleted_at IS NULL",
+		arg:       nil, // placeholder only, won't be used
+	})
 
-	limitArg := argIndex
-	offsetArg := argIndex + 1
+	whereClause, whereArgs := buildWhereClause(conditions)
 
-	args = append(args, req.Limit, offset)
-
-	query := fmt.Sprintf(`
+	// Build select query
+	selectQuery := fmt.Sprintf(`
 		SELECT
 			s.id,
 			s.username,
 			s.employee_code,
 			s.first_name,
 			s.last_name,
-			bc.code || ' (' || bc.name || ')' AS branches_name,
+			bc.code || ' (' || bc.name || ')' AS branch_name,
 			dpm.name AS department_name,
 			pst.name AS position_name,
 			s.status
@@ -162,18 +184,19 @@ func (r *repository) GetStaffList(req dto.GetStaffListRequest) ([]model.StaffLis
 		%s
 		ORDER BY s.id ASC
 		LIMIT $%d OFFSET $%d
-	`, whereQuery, limitArg, offsetArg)
+	`, whereClause, len(whereArgs)+1, len(whereArgs)+2)
 
-	rows, err := r.db.Query(context.Background(), query, args...)
+	queryArgs := append(whereArgs, req.Limit, offset)
+
+	rows, err := r.db.Query(ctx, selectQuery, queryArgs...)
 	if err != nil {
-		fmt.Println("query err:", err)
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("query staff list failed: %w", err)
 	}
 	defer rows.Close()
 
+	var staffList []model.StaffList
 	for rows.Next() {
 		var staff model.StaffList
-
 		err := rows.Scan(
 			&staff.ID,
 			&staff.Username,
@@ -186,44 +209,36 @@ func (r *repository) GetStaffList(req dto.GetStaffListRequest) ([]model.StaffLis
 			&staff.Status,
 		)
 		if err != nil {
-			return nil, 0, err
+			return nil, 0, fmt.Errorf("scan staff row failed: %w", err)
 		}
-
 		staffList = append(staffList, staff)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("rows iteration failed: %w", err)
 	}
 
-	// total count
-	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM erp.staffs s %s`, whereQuery)
-
+	// Total count query
+	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM erp.staffs s %s`, whereClause)
 	var total int
-
-	err = r.db.QueryRow(
-		context.Background(),
-		countQuery,
-		args[:len(args)-2]..., // ตัด limit offset ออก
-	).Scan(&total)
-
+	err = r.db.QueryRow(ctx, countQuery, whereArgs...).Scan(&total)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("count staff failed: %w", err)
 	}
 
 	return staffList, total, nil
 }
 
-func (r *repository) GetStaffById(id uuid.UUID) (model.Staff, error) {
+func (r *repository) GetStaffById(ctx context.Context, id uuid.UUID) (model.Staff, error) {
 	var staff model.Staff
 
 	query := `
 		SELECT id, employee_code, first_name, last_name, username, status
 		FROM erp.staffs
-		WHERE id = $1
+		WHERE id = $1 AND deleted_at IS NULL
 	`
 
-	err := r.db.QueryRow(context.Background(), query, id).Scan(
+	err := r.db.QueryRow(ctx, query, id).Scan(
 		&staff.ID,
 		&staff.EmployeeCode,
 		&staff.FirstName,
@@ -231,6 +246,12 @@ func (r *repository) GetStaffById(id uuid.UUID) (model.Staff, error) {
 		&staff.Username,
 		&staff.Status,
 	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return staff, fmt.Errorf("staff not found: %w", err)
+		}
+		return staff, fmt.Errorf("get staff by id failed: %w", err)
+	}
 
-	return staff, err
+	return staff, nil
 }
