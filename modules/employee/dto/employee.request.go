@@ -2,7 +2,7 @@ package dto
 
 import "github.com/google/uuid"
 
-type InsetEmpolyeeRequest struct {
+type InsertEmpolyeeRequest struct {
 	EmployeeId      uuid.UUID `json:"employee_id"`
 	Username        string    `json:"username"`
 	Password        string    `json:"password"`
@@ -22,4 +22,15 @@ type InsetEmpolyeeRequest struct {
 	Gender          string    `json:"gender"`
 	Birthday        string    `json:"birthday"`
 	Remark          string    `json:"remark"`
+}
+
+type GetListEmpolyeeRequest struct {
+	Username     string     `json:"username"`
+	EmployeeCode string     `json:"employee_code"`
+	FullName     string     `json:"full_name"`
+	BranchId     *uuid.UUID `json:"branch_id"`
+	DepartmentId *uuid.UUID `json:"department_id"`
+	StatusId     *uuid.UUID `json:"status_id"`
+	Page         int        `json:"page"`
+	Limit        int        `json:"limit"`
 }
